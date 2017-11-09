@@ -4,6 +4,9 @@ import os
 import subprocess
 
 
+MYPATH = os.path.join(os.getcwd(), 'test')
+
+
 class CMD(object):
     def __init__(self, handler):
         self.handler = handler
@@ -12,6 +15,7 @@ class CMD(object):
         return raw_input(os.getcwd() + '>').strip()
 
     def run(self):
+        self.handler.pre_run_operations()
         while True:
             input = self.get_input()
             if not input:
@@ -21,18 +25,35 @@ class CMD(object):
             method_name = 'do_' + cmd
             if hasattr(self.handler, method_name):
                 method = getattr(self.handler, method_name)
-                method(args)
+                output = method(args)
+                print output
             else:
                 try:
-                    exit_code = subprocess.check_call([cmd, args])
-                except Exception as e:
-                    print e
+                    exit_code = subprocess.check_call([cmd, args], shell=True)
+                except:
+                    pass
 
 
 class CmdHandler(object):
 
-    def set(self, ):
-        pass
+    def pre_run_operations(self):
+        os.environ['PATH'] += MYPATH + ';'
+
+    def do_set(self, args):
+        args = args.strip()
+        separator = '='
+        sep_index = args.find(separator)
+        argsv = filter(None, (args[:sep_index], args[sep_index + 1:]))
+        if '=' in args:
+            if len(argsv) == 2:
+                os.environ[argsv[0]] = argsv[1]
+                return ''
+            del os.environ[argsv[0]]
+            return ''
+        if not args:
+            return '\n'.join(['='.join([key, val]) for key, val in os.environ.iteritems()])
+        return '{}={}'.format(args, os.environ[args])
+
 
     def do_exit(self, *args):
         print 'Goodbye!'
@@ -41,6 +62,7 @@ class CmdHandler(object):
     def do_cd(self, newdir):
         if newdir:
             os.chdir(newdir)
+            return ''
         return os.getcwd()
 
 
