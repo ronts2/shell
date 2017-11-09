@@ -1,46 +1,47 @@
 # -*- coding: utf-8 -*-
 
 import os
-from functools import partial
 import subprocess
-
-
-INPUT = partial(raw_input, os.getcwd() + '>')
 
 
 class CMD(object):
     def __init__(self, handler):
         self.handler = handler
 
+    def get_input(self):
+        return raw_input(os.getcwd() + '>').strip()
+
     def run(self):
         while True:
-            input = INPUT()
+            input = self.get_input()
             if not input:
                 continue
             components = input.split()
             cmd, args = components[0], ' '.join(components[1:])
-            if hasattr(self.handler, cmd):
-                method = getattr(self.handler, cmd)
-                method(cmd, args)
+            method_name = 'do_' + cmd
+            if hasattr(self.handler, method_name):
+                method = getattr(self.handler, method_name)
+                method(args)
             else:
                 try:
-                    output = subprocess.check_call([cmd, args])
+                    exit_code = subprocess.check_call([cmd, args])
                 except Exception as e:
-                    output = str(e)
-                print output
+                    print e
 
 
 class CmdHandler(object):
-    def __init__(self):
+
+    def set(self, ):
         pass
 
-    def cd(self, newdir):
-        os.chdir(newdir)
+    def do_exit(self, *args):
+        print 'Goodbye!'
+        exit()
 
-    def where(self, cmd):
-        paths = os.environ['Path']
-        for path in paths:
-
+    def do_cd(self, newdir):
+        if newdir:
+            os.chdir(newdir)
+        return os.getcwd()
 
 
 def main():
