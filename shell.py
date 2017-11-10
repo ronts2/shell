@@ -44,16 +44,15 @@ class CmdHandler(object):
         separator = '='
         sep_index = args.find(separator)
         argsv = filter(None, (args[:sep_index], args[sep_index + 1:]))
-        if '=' in args:
+        if separator in args:
             if len(argsv) == 2:
                 os.environ[argsv[0]] = argsv[1]
                 return ''
             del os.environ[argsv[0]]
             return ''
         if not args:
-            return '\n'.join(['='.join([key, val]) for key, val in os.environ.iteritems()])
+            return '\n'.join([separator.join([key, val]) for key, val in os.environ.iteritems()])
         return '{}={}'.format(args, os.environ[args])
-
 
     def do_exit(self, *args):
         print 'Goodbye!'
