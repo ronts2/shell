@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+"""This module is used to display a hello message."""
+
 import os
 
 
